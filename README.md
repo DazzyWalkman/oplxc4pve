@@ -29,13 +29,13 @@ Notes: The new instance does NOT contain any nic. You may need to do the network
 ------
 Upgrading a running lxc instance of OpenWRT
 
-./opct.sh upgrade [upgrade|up] [Old_vmid] [New_vmid] [CT_template]
+./opct.sh [upgrade|up] [Old_vmid] [New_vmid] [CT_template]
 
 example:
 
 upgrade a running instance with vmid 101, ase on an openwrt template "/tmp/openwrt-snapshot-r13212-x86-64-plain.tar.gz". The resulting new instance is assigned vmid 102.
 
-./opct.sh 101 102 /tmp/openwrt-snapshot-r13212-x86-64-plain.tar.gz
+./opct.sh upgrade 101 102 /tmp/openwrt-snapshot-r13212-x86-64-plain.tar.gz
 
 ------
 Stop the old OpenWRT lxc instance, then start the new one, effectively do the swapping. Make OpenWRT downtime as short as possible.
