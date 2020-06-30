@@ -33,7 +33,7 @@ Upgrading a running lxc instance of OpenWRT
 
 example:
 
-upgrade a running instance with vmid 101, ase on an openwrt template "/tmp/openwrt-snapshot-r13212-x86-64-plain.tar.gz". The resulting new instance is assigned vmid 102.
+upgrade a running instance with vmid 101, base on an openwrt template "/tmp/openwrt-snapshot-r13212-x86-64-plain.tar.gz". The resulting new instance is assigned vmid 102.
 
 ./opct.sh upgrade 101 102 /tmp/openwrt-snapshot-r13212-x86-64-plain.tar.gz
 
