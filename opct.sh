@@ -146,7 +146,7 @@ start_newct() {
 }
 
 usage() {
-    echo "$0 [new|upgrade|swap]"
+    echo "$0 <new|upgrade|swap>"
     exit 1
 }
 
@@ -158,7 +158,7 @@ ct_template=$3
 
 if test -z "$ct_template" || [ "$newct" -le "0" ] ; then
 echo "This command creates a new OpenWRT lxc instance based on a user-specified CT template."
-echo "Usage: $0 [new|ne] [New_vmid] [CT_template]"
+echo "Usage: $0 <new|ne> <New_vmid> <CT_template>"
 exit 1
 fi
 
@@ -177,7 +177,7 @@ declare -i newct=$3
 
 if test -z "$newct" || [ "$oldct" -le "0" ] || [ "$newct" -le "0" ] || [ "$oldct" == "$newct" ] ; then
 echo "This command stops the old OpenWRT lxc instance, then starts the new one, effectively does the swapping."
-echo "Usage: $0 [swap|sw] [Old_vmid] [New_vmid]"
+echo "Usage: $0 <swap|sw> <Old_vmid> <New_vmid>"
 exit 1
 fi
 
@@ -205,7 +205,7 @@ ct_template=$4
 
 if test -z "$ct_template" || [ "$oldct" -le "0" ] || [ "$newct" -le "0" ] || [ "$oldct" == "$newct" ] ; then
 echo "This command creates an upgrade of the running OpenWRT lxc instance based on a user-specified CT template."
-echo "Usage: $0 [upgrade|up] [Old_vmid] [New_vmid] [CT_template]"
+echo "Usage: $0 <upgrade|up> <Old_vmid> <New_vmid> <CT_template>"
 exit 1
 fi
 

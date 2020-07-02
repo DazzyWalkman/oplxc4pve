@@ -16,7 +16,7 @@ Usage and examples
 ------
 Creating a new lxc instance of OpenWRT without nic: 
 
-./opct.sh [new|ne] [New_vmid] [CT_template]
+./opct.sh <new|ne> <New_vmid> <CT_template>
 
 example: 
 
@@ -29,7 +29,7 @@ Notes: The new instance does NOT contain any nic. You may need to do the network
 ------
 Upgrading a running lxc instance of OpenWRT
 
-./opct.sh [upgrade|up] [Old_vmid] [New_vmid] [CT_template]
+./opct.sh <upgrade|up> <Old_vmid> <New_vmid> <CT_template>
 
 example:
 
@@ -40,7 +40,7 @@ upgrade a running instance with vmid 101, base on an openwrt template "/tmp/open
 ------
 Stop the old OpenWRT lxc instance, then start the new one, effectively do the swapping. Make OpenWRT downtime as short as possible.
 
-./opct.sh [swap|sw] [Old_vmid] [New_vmid]
+./opct.sh <swap|sw> <Old_vmid> <New_vmid>
 
 example:
 
