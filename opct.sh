@@ -16,11 +16,11 @@ host_mp_path="/run/$host_share_dirname"
 #rootfs size for the new CT instance in GB
 rf_size="0.2"
 #memory size for the new CT instance in MB
-mem_size="128"
+declare -i mem_size="128"
 #arch of the new CT instance
 ctarch="amd64"
 #num of cpu cores assigned to the new CT instance
-cores="1"
+declare -i cores="1"
 
 
 check_oldct() {
@@ -218,6 +218,7 @@ echo "The new CT already exists."
 exit 1
 fi
 oldct_backup
+mem_size=$(grep "^memory" "$ct_conf_path"/"$oldct".conf|cut -d" " -f2) 
 create_newct
 createshare_new
 newct_restore
