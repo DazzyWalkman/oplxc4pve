@@ -130,8 +130,10 @@ copyconf_old2new() {
 	#Set the new ct start onboot
 	grep onboot "$octfn" >>"$nctfn"
 	grep order "$octfn" >>"$nctfn"
-	#Turn off start onboot for the old ct
-	sed -e '/^onboot/s/^/#/' -i "$octfn"
+	#Turn off start onboot for the old ct. Not using sed -i due to bug on pve.
+	local tmp=""
+	tmp=$(mktemp)
+	sed -e '/^onboot/s/^/#/' "$octfn" > "$tmp" && cat "$tmp" > "$octfn" && rm "$tmp"
 	echo "Conf from the old to the new one copied."
 
 }
