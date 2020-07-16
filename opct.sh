@@ -21,7 +21,9 @@ declare -i mem_size="128"
 ctarch="amd64"
 #num of cpu cores assigned to the new CT instance
 declare -i cores="1"
-
+#ct conf file full path name
+octfn="$ct_conf_path"/"$oldct".conf
+nctfn="$ct_conf_path"/"$newct".conf
 
 check_oldct() {
 	local oldstat=""
@@ -57,7 +59,7 @@ create_newct() {
 
 createshare_new(){
 	#The CTs use a bind mount of host_mp_path on host to share files among them.
-	echo "mp0: $host_mp_path/,mp=$guest_mp_path" >> "$ct_conf_path"/"$newct".conf
+	echo "mp0: $host_mp_path/,mp=$guest_mp_path" >> "$nctfn"
 }
 
 oldct_backup() {
@@ -118,18 +120,18 @@ stop_newct() {
 
 copyconf_old2new() {
 	#Copy remaining bind mounts to the new ct. 10 bind mounts ought to be enough.
-	grep "^mp[0-9]" "$ct_conf_path"/"$oldct".conf | grep -v "$host_share_dirname" >>"$ct_conf_path"/"$newct".conf
+	grep "^mp[0-9]" "$octfn" | grep -v "$host_share_dirname" >>"$nctfn"
 	#Copy nics to the new ct. 10 nics ought to be enough.
-	grep "^net[0-9]" "$ct_conf_path"/"$oldct".conf >>"$ct_conf_path"/"$newct".conf
+	grep "^net[0-9]" "$octfn" >>"$nctfn"
 	#For the lxc settings.
-	grep "^lxc" "$ct_conf_path"/"$oldct".conf >>"$ct_conf_path"/"$newct".conf
+	grep "^lxc" "$octfn" >>"$nctfn"
 	#Hookscript
-	grep "^hookscript" "$ct_conf_path"/"$oldct".conf >>"$ct_conf_path"/"$newct".conf
+	grep "^hookscript" "$octfn" >>"$nctfn"
 	#Set the new ct start onboot
-	grep onboot "$ct_conf_path"/"$oldct".conf >>"$ct_conf_path"/"$newct".conf
-	grep order "$ct_conf_path"/"$oldct".conf >>"$ct_conf_path"/"$newct".conf
+	grep onboot "$octfn" >>"$nctfn"
+	grep order "$octfn" >>"$nctfn"
 	#Turn off start onboot for the old ct
-	sed -e '/^onboot/s/^/#/' -i "$ct_conf_path"/"$oldct".conf
+	sed -e '/^onboot/s/^/#/' -i "$octfn"
 	echo "Conf from the old to the new one copied."
 
 }
