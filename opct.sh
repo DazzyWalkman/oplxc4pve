@@ -222,7 +222,7 @@ echo "The new CT already exists."
 exit 1
 fi
 oldct_backup
-mem_size=$(grep "^memory" "$ct_conf_path"/"$oldct".conf|cut -d" " -f2) 
+mem_size=$(grep "^memory" "$octfn"|cut -d" " -f2) 
 create_newct
 createshare_new
 newct_restore
