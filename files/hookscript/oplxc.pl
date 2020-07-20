@@ -16,7 +16,10 @@ system("modprobe -q sch_hfsc");
 system("modprobe -q ppp_generic");
 system("modprobe -q pppoe");
 system("modprobe -q slhc");
-system("chown 100000:100000 /dev/ppp");
+#Use dedicated device file for the lxc instance.
+system("mkdir -p /dev_lxc/");
+system("mknod -m 600 /dev_lxc/ppp c 108 0");
+system("chown 100000:100000 /dev_lxc/ppp");
 #Make dir for shared bind mount among CTs 
 system("mkdir -p /run/ctshare");
 #Make ctshare owned by container root, thus rw by CT is possible.
@@ -26,8 +29,8 @@ system("chown 100000:100000 /run/ctshare");
 } elsif ($phase eq 'post-start') {
 } elsif ($phase eq 'pre-stop') {
 } elsif ($phase eq 'post-stop') {
-#cleanup
-system("chown root:root /dev/ppp");
+#Cleanup
+system("rm /dev_lxc/ppp");
 } else {
     die "got unknown phase '$phase'\n";
 }
