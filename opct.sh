@@ -21,9 +21,6 @@ declare -i mem_size="128"
 ctarch="amd64"
 #num of cpu cores assigned to the new CT instance
 declare -i cores="1"
-#ct conf file full path name
-octfn="$ct_conf_path"/"$oldct".conf
-nctfn="$ct_conf_path"/"$newct".conf
 
 check_oldct() {
 	local oldstat=""
@@ -213,6 +210,9 @@ echo "Usage: $0 <upgrade|up> <Old_vmid> <New_vmid> <CT_template>"
 exit 1
 fi
 
+#ct conf file full path name
+octfn="$ct_conf_path"/"$oldct".conf
+nctfn="$ct_conf_path"/"$newct".conf
 
 check_oldct
 check_newct
