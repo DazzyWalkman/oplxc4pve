@@ -23,6 +23,8 @@ ctarch="amd64"
 declare -i cores="1"
 
 check_oldct() {
+	#The old ct conf file full path name
+	octfn="$ct_conf_path"/"$oldct".conf
 	local oldstat=""
 	oldstat=$("$CMD" list | grep "$oldct" | grep running)
 	if test -z "$oldstat"; then
@@ -33,6 +35,8 @@ check_oldct() {
 }
 
 check_newct() {
+	#The new ct conf file full path name
+	nctfn="$ct_conf_path"/"$newct".conf
 	local newstat=""
 	newstat=$("$CMD" list | grep "$newct")
 	if test -n "$newstat"; then
@@ -161,6 +165,12 @@ echo "This command creates a new OpenWRT lxc instance based on a user-specified 
 echo "Usage: $0 <new|ne> <New_vmid> <CT_template>"
 exit 1
 fi
+check_newct
+retval=$?
+if [ "$retval" -eq 1 ]; then 
+echo "The new CT already exists."
+exit 1
+fi
 create_newct
 createshare_new
 echo "Please note that this new instance does NOT contain any nic. You may need to do the network configuration later via Proxmox VE GUI or CLI. "
@@ -202,9 +212,6 @@ echo "This command creates an upgrade of the running OpenWRT lxc instance based 
 echo "Usage: $0 <upgrade|up> <Old_vmid> <New_vmid> <CT_template>"
 exit 1
 fi
-#ct conf file full path name
-octfn="$ct_conf_path"/"$oldct".conf
-nctfn="$ct_conf_path"/"$newct".conf
 check_oldct
 check_newct
 retval=$?
