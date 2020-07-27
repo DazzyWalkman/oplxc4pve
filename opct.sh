@@ -151,37 +151,32 @@ usage() {
     exit 1
 }
 
-if [ "$1" == "new" ] || [ "$1" == "ne" ] ; then
+donew(){
 #The vmid of the new OpenWRT lxc instance to be created
 declare -i newct=$2
 #The path and filename of the OpenWRT plain template
 ct_template=$3
-
 if test -z "$ct_template" || [ "$newct" -le "0" ] ; then
 echo "This command creates a new OpenWRT lxc instance based on a user-specified CT template."
 echo "Usage: $0 <new|ne> <New_vmid> <CT_template>"
 exit 1
 fi
-
 create_newct
 createshare_new
 echo "Please note that this new instance does NOT contain any nic. You may need to do the network configuration later via Proxmox VE GUI or CLI. "
 exit 0
-fi
+}
 
-if [ "$1" == "swap" ] || [ "$1" == "sw" ] ; then
+doswap(){
 #The old and running OpenWRT lxc instance vmid
 declare -i oldct=$2
 #The vmid of the new OpenWRT lxc instance to be created
 declare -i newct=$3
-
-
 if test -z "$newct" || [ "$oldct" -le "0" ] || [ "$newct" -le "0" ] || [ "$oldct" == "$newct" ] ; then
 echo "This command stops the old OpenWRT lxc instance, then starts the new one, effectively does the swapping."
 echo "Usage: $0 <swap|sw> <Old_vmid> <New_vmid>"
 exit 1
 fi
-
 check_oldct
 check_newct
 retval=$?
@@ -193,27 +188,23 @@ stop_oldct
 start_newct
 echo "OpenWRT CT instances swapping completed."
 exit 0
-fi
+}
 
-if [ "$1" == "upgrade" ] || [ "$1" == "up" ] ; then
+doupgrade(){
 #The old and running OpenWRT lxc instance vmid
 declare -i oldct=$2
 #The vmid of the new OpenWRT lxc instance to be created
 declare -i newct=$3
 #The path and filename of the OpenWRT plain template
 ct_template=$4
-
-
 if test -z "$ct_template" || [ "$oldct" -le "0" ] || [ "$newct" -le "0" ] || [ "$oldct" == "$newct" ] ; then
 echo "This command creates an upgrade of the running OpenWRT lxc instance based on a user-specified CT template."
 echo "Usage: $0 <upgrade|up> <Old_vmid> <New_vmid> <CT_template>"
 exit 1
 fi
-
 #ct conf file full path name
 octfn="$ct_conf_path"/"$oldct".conf
 nctfn="$ct_conf_path"/"$newct".conf
-
 check_oldct
 check_newct
 retval=$?
@@ -230,6 +221,12 @@ stop_newct
 copyconf_old2new
 echo "An upgraded instance of OpenWRT CT has been created successfully. "
 exit 0
-fi
+}
 
-usage
+subcmd="$1"
+case $subcmd in 
+"new"|"ne") donew "$@";;
+"upgrade"|"up") doupgrade "$@";;
+"swap"|"sw") doswap "$@";;
+*) usage;;
+esac
