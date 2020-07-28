@@ -47,9 +47,12 @@ check_newct() {
 }
 
 create_newct() {
+	#The CTs use a bind mount of host_mp_path on host to share files among them.
+	mkdir -p "$host_mp_path"
+	chown 100000:100000 "$host_mp_path"
 	local newstat=""
 	ctname=$(basename "$ct_template" | cut -d'-' -f1)-$(basename "$ct_template" | cut -d'-' -f3)
-	"$CMD" create "$newct" "$ct_template" --rootfs "$ctStrg":"$rf_size" --ostype unmanaged --hostname "$ctname" --arch "$ctarch" --cores "$cores" --memory "$mem_size" --swap 0 --unprivileged 1
+	"$CMD" create "$newct" "$ct_template" --rootfs "$ctStrg":"$rf_size" --ostype unmanaged --hostname "$ctname" --arch "$ctarch" --cores "$cores" --memory "$mem_size" --mp0 "$host_mp_path/,mp=$guest_mp_path" --swap 0 --unprivileged 1
 	newstat=$("$CMD" list | grep "$newct")
 	if test -z "$newstat"; then
 		echo "Failed to Create CT"
@@ -58,10 +61,6 @@ create_newct() {
 	echo "New CT Created."
 }
 
-createshare_new(){
-	#The CTs use a bind mount of host_mp_path on host to share files among them.
-	echo "mp0: $host_mp_path/,mp=$guest_mp_path" >> "$nctfn"
-}
 
 oldct_backup() {
 	rm "$host_mp_path"/"$backup_filename"
@@ -172,7 +171,6 @@ echo "The new CT already exists."
 exit 1
 fi
 create_newct
-createshare_new
 echo "Please note that this new instance does NOT contain any nic. You may need to do the network configuration later via Proxmox VE GUI or CLI. "
 exit 0
 }
@@ -222,7 +220,6 @@ fi
 oldct_backup
 mem_size=$(grep "^memory" "$octfn"|cut -d" " -f2) 
 create_newct
-createshare_new
 newct_restore
 stop_newct
 copyconf_old2new
