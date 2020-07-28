@@ -1,12 +1,12 @@
 oplxc4pve
 ===========
 
-Wrapper scripts for creating/upgrading unprivileged lxc instances from OpenWrt rootfs templates on the Proxmox VE hypervisor. 
+Wrapper script for creating/upgrading unprivileged lxc instances from OpenWrt rootfs templates on the Proxmox VE hypervisor. 
 
 Requirements
 ------------
 The Proxmox VE 6.2. 
-Scripts or resulting OpenWRT instances may work on old pve versions, however it's untested.
+This script or the resulting OpenWRT instances may work on older pve versions, however it's untested.
  
 Configuration
 -------------
@@ -44,7 +44,7 @@ Stop the old OpenWRT lxc instance, then start the new one, effectively do the sw
 
 example:
 
-Swap a running old instance ( vmid 101), with new one (vmid 102)
+Swap a running old instance (vmid 101), with new one (vmid 102)
 
 ./opct.sh swap 101 102
 
