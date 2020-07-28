@@ -27,7 +27,7 @@ check_oldct() {
 	octfn="$ct_conf_path"/"$oldct".conf
 	local oldstat=""
 	oldstat=$("$CMD" list | grep "$oldct" | grep running)
-	if test -z "$oldstat"; then
+	if [ -z "$oldstat" ]; then
 		echo "The old CT does not exist or is not running."
 		exit 1
 	fi
@@ -38,7 +38,7 @@ check_newct() {
 	nctfn="$ct_conf_path"/"$newct".conf
 	local newstat=""
 	newstat=$("$CMD" list | grep "$newct")
-	if test -n "$newstat"; then
+	if [ -n "$newstat" ]; then
 		return 1
 	else
 		return 0
@@ -52,8 +52,8 @@ create_newct() {
 	local newstat=""
 	ctname=$(basename "$ct_template" | cut -d'-' -f1)-$(basename "$ct_template" | cut -d'-' -f3)
 	"$CMD" create "$newct" "$ct_template" --rootfs "$ctStrg":"$rf_size" --ostype unmanaged --hostname "$ctname" --arch "$ctarch" --cores "$cores" --memory "$mem_size" --mp0 "$host_mp_path/,mp=$guest_mp_path" --swap 0 --unprivileged 1
-	newstat=$("$CMD" list | grep "$newct")
-	if test -z "$newstat"; then
+	newstat=$?
+	if [ "$newstat" -ne 0 ]; then
 		echo "Failed to Create CT"
 		exit 1
 	fi
@@ -64,7 +64,7 @@ oldct_backup() {
 	rm "$host_mp_path"/"$backup_filename"
 	"$CMD" exec "$oldct" -- ash -c "sysupgrade -b $guest_mp_path/$backup_filename"
 	local res=$?
-	if test $res -eq 0; then
+	if [ $res -eq 0 ]; then
 		echo "Old CT conf backup completed."
 	else
 		echo "Old CT conf backup failed."
@@ -73,15 +73,15 @@ oldct_backup() {
 }
 
 newct_restore() {
-	"$CMD" start "$newct"
 	local newstat=""
-	newstat=$("$CMD" status "$newct" | grep running)
-	if test -n "$newstat"; then
+	"$CMD" start "$newct"
+	newstat=$?
+	if [ "$newstat" -eq 0 ]; then
 		#Wait for the new CT init complete.
 		sleep 5
 		"$CMD" exec "$newct" -- ash -c "sysupgrade -r $guest_mp_path/$backup_filename"
 		local res=$?
-		if test $res -eq 0; then
+		if [ $res -eq 0 ]; then
 			echo "New CT conf restored."
 		else
 			echo "New CT conf restoration failed."
@@ -94,10 +94,10 @@ newct_restore() {
 }
 
 stop_oldct() {
-	"$CMD" stop "$oldct"
 	local oldstat=""
-	oldstat=$("$CMD" status "$oldct" | grep stop)
-	if test -z "$oldstat"; then
+	"$CMD" stop "$oldct"
+	oldstat=$?
+	if [ "$oldstat" -ne 0 ]; then
 		echo "The old CT is not stopped."
 		exit 1
 	fi
@@ -105,10 +105,10 @@ stop_oldct() {
 }
 
 stop_newct() {
-	"$CMD" stop "$newct"
 	local newstat=""
-	newstat=$("$CMD" status "$newct" | grep stop)
-	if test -z "$newstat"; then
+	"$CMD" stop "$newct"
+	newstat=$?
+	if [ "$newstat" -ne 0 ]; then
 		echo "The new CT is not stopped."
 		exit 1
 	fi
@@ -135,10 +135,10 @@ copyconf_old2new() {
 }
 
 start_newct() {
-	"$CMD" start "$newct"
 	local newstat=""
-	newstat=$("$CMD" status "$newct" | grep running)
-	if test -z "$newstat"; then
+	"$CMD" start "$newct"
+	newstat=$?
+	if [ "$newstat" -ne 0 ]; then
 		echo "The new CT is not started."
 		exit 1
 	fi
@@ -155,9 +155,13 @@ donew() {
 	declare -i newct=$2
 	#The path and filename of the OpenWRT plain template
 	ct_template=$3
-	if test -z "$ct_template" || [ "$newct" -le "0" ]; then
+	if [ -z "$ct_template" ] || [ "$newct" -le "0" ]; then
 		echo "This command creates a new OpenWRT lxc instance based on a user-specified CT template."
 		echo "Usage: $0 <new|ne> <New_vmid> <CT_template>"
+		exit 1
+	fi
+	if [ ! -f "$ct_template" ]; then
+		echo "$ct_template does not exist."
 		exit 1
 	fi
 	check_newct
@@ -176,7 +180,7 @@ doswap() {
 	declare -i oldct=$2
 	#The vmid of the new OpenWRT lxc instance to be created
 	declare -i newct=$3
-	if test -z "$newct" || [ "$oldct" -le "0" ] || [ "$newct" -le "0" ] || [ "$oldct" == "$newct" ]; then
+	if [ -z "$newct" ] || [ "$oldct" -le "0" ] || [ "$newct" -le "0" ] || [ "$oldct" == "$newct" ]; then
 		echo "This command stops the old OpenWRT lxc instance, then starts the new one, effectively does the swapping."
 		echo "Usage: $0 <swap|sw> <Old_vmid> <New_vmid>"
 		exit 1
@@ -201,9 +205,13 @@ doupgrade() {
 	declare -i newct=$3
 	#The path and filename of the OpenWRT plain template
 	ct_template=$4
-	if test -z "$ct_template" || [ "$oldct" -le "0" ] || [ "$newct" -le "0" ] || [ "$oldct" == "$newct" ]; then
+	if [ -z "$ct_template" ] || [ "$oldct" -le "0" ] || [ "$newct" -le "0" ] || [ "$oldct" == "$newct" ]; then
 		echo "This command creates an upgrade of the running OpenWRT lxc instance based on a user-specified CT template."
 		echo "Usage: $0 <upgrade|up> <Old_vmid> <New_vmid> <CT_template>"
+		exit 1
+	fi
+	if [ ! -f "$ct_template" ]; then
+		echo "$ct_template does not exist."
 		exit 1
 	fi
 	check_oldct
