@@ -61,7 +61,9 @@ create_newct() {
 }
 
 oldct_backup() {
-	rm "$host_mp_path"/"$backup_filename"
+	if [ -f "$host_mp_path"/"$backup_filename" ]; then
+		rm "$host_mp_path"/"$backup_filename"
+	fi
 	"$CMD" exec "$oldct" -- ash -c "sysupgrade -b $guest_mp_path/$backup_filename"
 	local res=$?
 	if [ $res -eq 0 ]; then
