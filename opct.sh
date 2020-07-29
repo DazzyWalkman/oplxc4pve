@@ -117,7 +117,7 @@ stop_newct() {
 
 copyconf_old2new() {
 	#Copy remaining bind mounts to the new ct. 10 bind mounts ought to be enough.
-	grep "^mp[0-9]" "$octfn" | grep -v "$host_share_dirname" >>"$nctfn"
+	grep "^mp[1-9]" "$octfn" >>"$nctfn"
 	#Copy nics to the new ct. 10 nics ought to be enough.
 	grep "^net[0-9]" "$octfn" >>"$nctfn"
 	#For the lxc settings.
