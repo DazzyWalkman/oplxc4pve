@@ -26,7 +26,7 @@ check_oldct() {
 	#The old ct conf file full path name
 	octfn="$ct_conf_path"/"$oldct".conf
 	local oldstat=""
-	oldstat=$("$CMD" list | grep "$oldct" | grep running)
+	oldstat=$("$CMD" status "$oldct" 2>&1 | grep running)
 	if [ -z "$oldstat" ]; then
 		echo "The old CT does not exist or is not running."
 		exit 1
@@ -37,7 +37,7 @@ check_newct() {
 	#The new ct conf file full path name
 	nctfn="$ct_conf_path"/"$newct".conf
 	local newstat=""
-	newstat=$("$CMD" list | grep "$newct")
+	newstat=$("$CMD" status "$newct" 2>&1 | grep status)
 	if [ -n "$newstat" ]; then
 		return 1
 	else
