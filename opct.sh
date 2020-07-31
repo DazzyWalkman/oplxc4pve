@@ -16,11 +16,15 @@ host_mp_path="/run/$host_share_dirname"
 #rootfs size for the new CT instance in GB
 rf_size="0.2"
 #memory size for the new CT instance in MB
-declare -i mem_size="128"
+declare -i memory="128"
 #arch of the new CT instance
-ctarch="amd64"
+arch="amd64"
 #num of cpu cores assigned to the new CT instance
 declare -i cores="1"
+#swap size in MB
+declare -i swap="0"
+#unprivileged or not
+declare -i unprivileged="1"
 
 check_oldct() {
 	#The old ct conf file full path name
@@ -51,7 +55,7 @@ create_newct() {
 	chown 100000:100000 "$host_mp_path"
 	local newstat=""
 	ctname=$(basename "$ct_template" | cut -d'-' -f1)-$(basename "$ct_template" | cut -d'-' -f3)
-	"$CMD" create "$newct" "$ct_template" --rootfs "$ctStrg":"$rf_size" --ostype unmanaged --hostname "$ctname" --arch "$ctarch" --cores "$cores" --memory "$mem_size" --mp0 "$host_mp_path/,mp=$guest_mp_path" --swap 0 --unprivileged 1
+	"$CMD" create "$newct" "$ct_template" --rootfs "$ctStrg":"$rf_size" --ostype unmanaged --hostname "$ctname" --arch "$arch" --cores "$cores" --memory "$memory" --mp0 "$host_mp_path/,mp=$guest_mp_path" --swap "$swap" --unprivileged "$unprivileged"
 	newstat=$?
 	if [ "$newstat" -ne 0 ]; then
 		echo "Failed to Create CT"
@@ -152,6 +156,23 @@ usage() {
 	exit 1
 }
 
+getoctpara() {
+	arch=$(grep "^arch" "$octfn" | cut -d" " -f2)
+	cores=$(grep "^cores" "$octfn" | cut -d" " -f2)
+	memory=$(grep "^memory" "$octfn" | cut -d" " -f2)
+	ctStrg=$(grep "^rootfs" "$octfn" | cut -d":" -f2 | xargs)
+	local tmp_size=""
+	tmp_size=$(grep "^rootfs" "$octfn" | cut -d"=" -f2)
+	case $(echo -n "$tmp_size" | tail -c 1) in
+		"G") rf_size=$(echo "$tmp_size" | cut -d"G" -f1) ;;
+			#When an integer is divided by 1024 (2^10), 10 decimal digits after the decimal point is enough.
+		"M") rf_size=$(echo "$(echo "$tmp_size" | cut -d"M" -f1) 1024" | awk '{printf "%.10f",$1 / $2}') ;;
+		*) echo "The disk size of the old ct is unknown. Default Value will be used." ;;
+	esac
+	swap=$(grep "^swap" "$octfn" | cut -d" " -f2)
+	unprivileged=$(grep "^unprivileged" "$octfn" | cut -d" " -f2)
+}
+
 donew() {
 	#The vmid of the new OpenWRT lxc instance to be created
 	declare -i newct=$2
@@ -224,7 +245,7 @@ doupgrade() {
 		exit 1
 	fi
 	oldct_backup
-	mem_size=$(grep "^memory" "$octfn" | cut -d" " -f2)
+	getoctpara
 	create_newct
 	newct_restore
 	stop_newct
