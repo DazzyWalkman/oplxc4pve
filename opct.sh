@@ -50,6 +50,13 @@ check_newct() {
 }
 
 create_newct() {
+	#if the rootfs fails to hold the tarball content with 50% free space remaining, then set rootfs to the double of the tarball size.
+	local tar_size=""
+	tar_size=$(tar tzvf "$ct_template" | awk '{s+=$3} END{print (s/1024/1024/512)}')
+	if [ $(echo "$tar_size > $rf_size" | bc) -ne 0 ]; then
+		echo "The tarball is larger than the previously defined rootfs size. Increase the rootfs size to $tar_size GB."
+		rf_size="$tar_size"
+	fi
 	#The CTs use a bind mount of host_mp_path on host to share files among them.
 	mkdir -p "$host_mp_path"
 	chown 100000:100000 "$host_mp_path"
