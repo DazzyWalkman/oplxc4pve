@@ -12,6 +12,9 @@ system("modprobe -q cls_fw");
 system("modprobe -q cls_flow");
 system("modprobe -q sch_htb");
 system("modprobe -q sch_hfsc");
+system("modprobe -q sch_ingress");
+system("modprobe -q act_mirred");
+system("modprobe -q cls_u32");
 #Needed by pppoe
 system("modprobe -q ppp_generic");
 system("modprobe -q pppoe");
