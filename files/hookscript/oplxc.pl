@@ -6,19 +6,45 @@ print "GUEST HOOK: " . join(' ', @ARGV). "\n";
 my $vmid = shift;
 my $phase = shift;
 if ($phase eq 'pre-start') {
-#You can also load kernel modules via host /etc/modules. More or less kmods are needed depending on different use cases. Hook script is prefered this time with pppoe and sqm modules. 
+#You can also load kernel modules via host /etc/modules. More or less kmods are needed depending on different use cases. Hook script is prefered this time with package ppp and sqm as example. 
 #Needed by sqm
-system("modprobe -q cls_fw");
-system("modprobe -q cls_flow");
-system("modprobe -q sch_htb");
-system("modprobe -q sch_hfsc");
-system("modprobe -q sch_ingress");
-system("modprobe -q act_mirred");
-system("modprobe -q cls_u32");
-#Needed by pppoe
-system("modprobe -q ppp_generic");
-system("modprobe -q pppoe");
-system("modprobe -q slhc");
+system("modprobe sch_ingress");
+system("modprobe sch_fq_codel");
+system("modprobe sch_hfsc");
+system("modprobe sch_htb");
+system("modprobe sch_tbf");
+system("modprobe cls_basic");
+system("modprobe cls_fw");
+system("modprobe cls_route");
+system("modprobe cls_flow");
+system("modprobe cls_tcindex");
+system("modprobe cls_u32");
+system("modprobe em_u32");
+system("modprobe act_mirred");
+system("modprobe act_skbedit");
+system("modprobe cls_matchall");
+system("modprobe act_connmark");
+system("modprobe act_ctinfo");
+system("modprobe sch_cake");
+system("modprobe sch_netem");
+system("modprobe sch_mqprio");
+system("modprobe em_ipset");
+system("modprobe cls_bpf");
+system("modprobe cls_flower");
+system("modprobe act_bpf");
+system("modprobe act_vlan");
+system("modprobe ifb");
+#Needed by ppp
+system("modprobe slhc");
+system("modprobe ppp_generic");
+system("modprobe pppox");
+system("modprobe pppoe");
+system("modprobe pppoatm");
+system("modprobe ppp_async");
+system("modprobe ppp_mppe");
+system("modprobe ip_gre");
+system("modprobe gre");
+system("modprobe pptp");
 #Use dedicated device file for the lxc instance.
 system("mkdir -p /dev_lxc/");
 system("mknod -m 600 /dev_lxc/ppp c 108 0");
