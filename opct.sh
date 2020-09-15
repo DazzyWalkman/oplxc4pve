@@ -131,8 +131,8 @@ stop_newct() {
 copyconf_old2new() {
 	#Copy remaining bind mounts to the new ct. 10 bind mounts ought to be enough.
 	grep "^mp[1-9]" "$octfn" >>"$nctfn"
-	#Copy nics to the new ct. 10 nics ought to be enough.
-	grep "^net[0-9]" "$octfn" >>"$nctfn"
+	#Copy nics to the new ct. As of pve-container 3.1-13, a maximum number of 32 nics is allowed.
+	grep -E "^net([0-9]|[12][0-9]|3[01])" "$octfn" >>"$nctfn"
 	#For the lxc settings.
 	grep "^lxc" "$octfn" >>"$nctfn"
 	#Hookscript
