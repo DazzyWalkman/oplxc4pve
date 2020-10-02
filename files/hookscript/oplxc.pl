@@ -6,7 +6,7 @@ print "GUEST HOOK: " . join(' ', @ARGV). "\n";
 my $vmid = shift;
 my $phase = shift;
 if ($phase eq 'pre-start') {
-#You can also load kernel modules via host /etc/modules. More or less kmods are needed depending on different use cases. Hook script is prefered this time with package ppp and sqm as example. 
+#You can also load kernel modules via host /etc/modules. More or less kmods are needed depending on different use cases. Hook script is prefered this time. 
 #Needed by sqm
 system("modprobe sch_ingress");
 system("modprobe sch_fq_codel");
@@ -45,6 +45,8 @@ system("modprobe ppp_mppe");
 system("modprobe ip_gre");
 system("modprobe gre");
 system("modprobe pptp");
+#Needed by nft_chain_nat
+system("modprobe nft_chain_nat");
 #Use dedicated device file for the lxc instance.
 system("mkdir -p /dev_lxc/");
 system("mknod -m 600 /dev_lxc/ppp c 108 0");
