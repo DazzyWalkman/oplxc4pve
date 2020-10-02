@@ -260,7 +260,7 @@ doupgrade() {
 	copyconf_old2new
 	echo "An upgraded instance of OpenWRT CT has been created successfully. "
 	echo "The old instance is left untouched except start_onboot disabled."
-	echo "The new instance is independent of the old one. Users may delete the old instances via pct destory when they see fit."
+	echo "The new instance is independent of the old one. Users may delete the old instances via pct destroy when they see fit."
 	exit 0
 }
 
