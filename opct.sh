@@ -6,7 +6,7 @@ CMD="/usr/sbin/pct"
 #Path of Proxmox CT conf
 ct_conf_path="/etc/pve/lxc"
 #OpenWRT config backup filename
-backup_filename="opctbak"
+backup_filename="sysupgrade.tgz"
 #bind mount MP in the CT instance
 guest_mp_path="/shared"
 #bind mount dirname on host
@@ -87,22 +87,25 @@ oldct_backup() {
 }
 
 newct_restore() {
-	local newstat=""
-	"$CMD" start "$newct"
-	newstat=$?
-	if [ "$newstat" -eq 0 ]; then
-		#Wait for the new CT init complete.
-		sleep 5
-		"$CMD" exec "$newct" -- ash -c "sysupgrade -r $guest_mp_path/$backup_filename"
-		local res=$?
-		if [ $res -eq 0 ]; then
-			echo "New CT conf restored."
+	#Validate the config backup file
+	if gunzip -c "$host_mp_path"/"$backup_filename" | tar -t >/dev/null; then
+		local newct_rootfs=""
+		newct_rootfs=$("$CMD" mount "$newct" | cut -d \' -f2)
+		if [ -d "$newct_rootfs" ]; then
+			#Copy the config backup file to the newct root. It will get restored during the first boot of the new ct.
+			cp "$host_mp_path"/"$backup_filename" "$newct_rootfs"
+			#Make sure the backup file is owned by ct root, thus can be deleted after restoration.
+			chown 100000:100000 "$newct_rootfs"/"$backup_filename"
+			if ! pct unmount "$newct"; then
+				exit 1
+			fi
+			echo "New CT conf copied."
 		else
-			echo "New CT conf restoration failed."
+			echo "Cannot mount the rootfs of the new CT. Failed to restore config."
 			exit 1
 		fi
 	else
-		echo "The new CT is not running. Failed to restore."
+		echo "Invalid conf for the new ct."
 		exit 1
 	fi
 }
@@ -116,17 +119,6 @@ stop_oldct() {
 		exit 1
 	fi
 	echo "The old CT stopped."
-}
-
-stop_newct() {
-	local newstat=""
-	"$CMD" stop "$newct"
-	newstat=$?
-	if [ "$newstat" -ne 0 ]; then
-		echo "The new CT is not stopped."
-		exit 1
-	fi
-	echo "The new CT stopped."
 }
 
 copyconf_old2new() {
@@ -256,7 +248,6 @@ doupgrade() {
 	getoctpara
 	create_newct
 	newct_restore
-	stop_newct
 	copyconf_old2new
 	echo "An upgraded instance of OpenWRT CT has been created successfully. "
 	echo "The old instance is left untouched except start_onboot disabled."
