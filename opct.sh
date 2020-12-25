@@ -60,12 +60,9 @@ create_newct() {
 	#The CTs use a bind mount of host_mp_path on host to share files among them.
 	mkdir -p "$host_mp_path"
 	chown 100000:100000 "$host_mp_path"
-	local newstat=""
 	ctname=$(basename "$ct_template" | cut -d'-' -f1)-$(basename "$ct_template" | cut -d'-' -f3)
 	ctname=$(echo "$ctname" | sed -e 's/[^a-zA-Z0-9-]/-/g' | sed -e 's/^--*//' | sed -e 's/--*$//')
-	"$CMD" create "$newct" "$ct_template" --rootfs "$ctStrg":"$rf_size" --ostype unmanaged --hostname "$ctname" --arch "$arch" --cores "$cores" --memory "$memory" --mp0 "$host_mp_path/,mp=$guest_mp_path" --swap "$swap" --unprivileged "$unprivileged"
-	newstat=$?
-	if [ "$newstat" -ne 0 ]; then
+	if ! "$CMD" create "$newct" "$ct_template" --rootfs "$ctStrg":"$rf_size" --ostype unmanaged --hostname "$ctname" --arch "$arch" --cores "$cores" --memory "$memory" --mp0 "$host_mp_path/,mp=$guest_mp_path" --swap "$swap" --unprivileged "$unprivileged"; then
 		echo "Failed to Create CT"
 		exit 1
 	fi
@@ -76,9 +73,7 @@ oldct_backup() {
 	if [ -f "$host_mp_path"/"$backup_filename" ]; then
 		rm "$host_mp_path"/"$backup_filename"
 	fi
-	"$CMD" exec "$oldct" -- ash -c "sysupgrade -b $guest_mp_path/$backup_filename"
-	local res=$?
-	if [ $res -eq 0 ]; then
+	if "$CMD" exec "$oldct" -- ash -c "sysupgrade -b $guest_mp_path/$backup_filename"; then
 		echo "Old CT conf backup completed."
 	else
 		echo "Old CT conf backup failed."
@@ -111,10 +106,7 @@ newct_restore() {
 }
 
 stop_oldct() {
-	local oldstat=""
-	"$CMD" stop "$oldct"
-	oldstat=$?
-	if [ "$oldstat" -ne 0 ]; then
+	if ! "$CMD" stop "$oldct"; then
 		echo "The old CT is not stopped."
 		exit 1
 	fi
@@ -141,10 +133,7 @@ copyconf_old2new() {
 }
 
 start_newct() {
-	local newstat=""
-	"$CMD" start "$newct"
-	newstat=$?
-	if [ "$newstat" -ne 0 ]; then
+	if ! "$CMD" start "$newct"; then
 		echo "The new CT is not started."
 		exit 1
 	fi
@@ -187,9 +176,8 @@ donew() {
 		echo "$ct_template does not exist."
 		exit 1
 	fi
-	check_newct
-	retval=$?
-	if [ "$retval" -eq 1 ]; then
+	
+	if ! check_newct; then
 		echo "The new CT already exists."
 		exit 1
 	fi
@@ -209,9 +197,7 @@ doswap() {
 		exit 1
 	fi
 	check_oldct
-	check_newct
-	retval=$?
-	if [ "$retval" -eq 0 ]; then
+	if check_newct; then
 		echo "The new CT does not exist."
 		exit 1
 	fi
@@ -238,9 +224,7 @@ doupgrade() {
 		exit 1
 	fi
 	check_oldct
-	check_newct
-	retval=$?
-	if [ "$retval" -eq 1 ]; then
+	if ! check_newct; then
 		echo "The new CT already exists."
 		exit 1
 	fi
