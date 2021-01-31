@@ -1,8 +1,12 @@
 #!/bin/bash
+CMD=$(command -v pct)
+if [ ! -x "$CMD" ]; then
+	echo "Pct utility not found. Abort."
+	exit 1
+fi
 #Storage name in Proxmox for CT instance rootfs disk
 ctStrg="local-lvm"
 #Full path of Proxmox pct utility
-CMD="/usr/sbin/pct"
 #Path of Proxmox CT conf
 ct_conf_path="/etc/pve/lxc"
 #OpenWRT config backup filename
