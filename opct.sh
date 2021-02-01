@@ -31,8 +31,6 @@ declare -i swap="0"
 declare -i unprivileged="1"
 
 check_oldct() {
-	#The old ct conf file full path name
-	octfn="$ct_conf_path"/"$oldct".conf
 	local oldstat=""
 	oldstat=$("$CMD" status "$oldct" 2>&1 | grep running)
 	if [ -z "$oldstat" ]; then
@@ -42,8 +40,6 @@ check_oldct() {
 }
 
 check_newct() {
-	#The new ct conf file full path name
-	nctfn="$ct_conf_path"/"$newct".conf
 	local newstat=""
 	newstat=$("$CMD" status "$newct" 2>&1 | grep status)
 	if [ -n "$newstat" ]; then
@@ -180,7 +176,7 @@ donew() {
 		echo "$ct_template does not exist."
 		exit 1
 	fi
-	
+
 	if ! check_newct; then
 		echo "The new CT already exists."
 		exit 1
@@ -216,6 +212,10 @@ doupgrade() {
 	declare -i oldct=$2
 	#The vmid of the new OpenWRT lxc instance to be created
 	declare -i newct=$3
+	#The old ct conf file full path name
+	octfn="$ct_conf_path"/"$oldct".conf
+	#The new ct conf file full path name
+	nctfn="$ct_conf_path"/"$newct".conf
 	#The path and filename of the OpenWRT plain template
 	ct_template=$4
 	if [ -z "$ct_template" ] || [ "$oldct" -le "0" ] || [ "$newct" -le "0" ] || [ "$oldct" == "$newct" ]; then
