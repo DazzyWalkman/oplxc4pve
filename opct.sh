@@ -30,19 +30,12 @@ declare -i swap="0"
 #unprivileged or not
 declare -i unprivileged="1"
 
-check_oldct() {
-	local oldstat=""
-	oldstat=$("$CMD" status "$oldct" 2>&1 | grep running)
-	if [ -z "$oldstat" ]; then
-		echo "The old CT does not exist or is not running."
-		exit 1
-	fi
-}
-
-check_newct() {
-	local newstat=""
-	newstat=$("$CMD" status "$newct" 2>&1 | grep status)
-	if [ -n "$newstat" ]; then
+check_ct() {
+	local ctid="$1"
+	local chkstat="$2"
+	local ctstat=""
+	ctstat=$("$CMD" status "$ctid" 2>&1 | grep "$chkstat")
+	if [ -n "$ctstat" ]; then
 		return 1
 	else
 		return 0
@@ -177,7 +170,7 @@ donew() {
 		exit 1
 	fi
 
-	if ! check_newct; then
+	if ! check_ct "$newct" status; then
 		echo "The new CT already exists."
 		exit 1
 	fi
@@ -196,8 +189,12 @@ doswap() {
 		echo "Usage: $0 <swap|sw> <Old_vmid> <New_vmid>"
 		exit 1
 	fi
-	check_oldct
-	if check_newct; then
+	if check_ct "$oldct" running; then
+		echo "The old CT does not exist or is not running."
+		exit 1
+	fi
+
+	if check_ct "$newct" status; then
 		echo "The new CT does not exist."
 		exit 1
 	fi
@@ -227,8 +224,11 @@ doupgrade() {
 		echo "$ct_template does not exist."
 		exit 1
 	fi
-	check_oldct
-	if ! check_newct; then
+	if check_ct "$oldct" running; then
+		echo "The old CT does not exist or is not running."
+		exit 1
+	fi
+	if ! check_ct "$newct" status; then
 		echo "The new CT already exists."
 		exit 1
 	fi
