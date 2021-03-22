@@ -53,8 +53,15 @@ create_newct() {
 	#The CTs use a bind mount of host_mp_path on host to share files among them.
 	mkdir -p "$host_mp_path"
 	chown 100000:100000 "$host_mp_path"
-	ctname=$(basename "$ct_template" | cut -d'-' -f1)-$(basename "$ct_template" | cut -d'-' -f3)
+	ctname=$(tar xfO "$ct_template" ./etc/openwrt_release 2>/dev/nul | grep DISTRIB_DESCRIPTION | sed -e "s/.*='\(.*\)'/\1/")
+	if [ ! "$ctname" ]; then
+		echo "Failed to extract ct name from the openwrt_release file. Fallback to extracting from the template filename."
+		ctname=$(basename "$ct_template" | cut -d'-' -f1)-$(basename "$ct_template" | cut -d'-' -f2)-$(basename "$ct_template" | cut -d'-' -f3)-$(basename "$ct_template" | cut -d'-' -f4)
+	fi
 	ctname=$(echo "$ctname" | sed -e 's/[^a-zA-Z0-9-]/-/g' | sed -e 's/^--*//' | sed -e 's/--*$//')
+	if [ ! "$ctname" ]; then
+		ctname="Unknown"
+	fi
 	if ! "$CMD" create "$newct" "$ct_template" --rootfs "$ctStrg":"$rf_size" --ostype unmanaged --hostname "$ctname" --arch "$arch" --cores "$cores" --memory "$memory" --mp0 "$host_mp_path/,mp=$guest_mp_path" --swap "$swap" --unprivileged "$unprivileged"; then
 		echo "Failed to Create CT"
 		exit 1
