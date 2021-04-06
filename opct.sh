@@ -182,7 +182,8 @@ donew() {
 		exit 1
 	fi
 	create_newct
-	echo "Please note that this new instance does NOT contain any nic. You may need to do the network configuration later via Proxmox VE GUI or CLI. "
+	echo "Please note that this new instance does NOT contain any nic. You may need to do the network configuration later via Proxmox VE GUI or CLI."
+	echo 'And you may also have to adjust the hookscript settings of the new ct. Please see "files" directory for detail.'
 	exit 0
 }
 
