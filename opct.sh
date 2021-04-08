@@ -6,7 +6,6 @@ if [ ! -x "$CMD" ]; then
 fi
 #Storage name in Proxmox for CT instance rootfs disk
 ctStrg="local-lvm"
-#Full path of Proxmox pct utility
 #Path of Proxmox CT conf
 ct_conf_path="/etc/pve/lxc"
 #OpenWRT config backup filename
