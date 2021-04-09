@@ -105,11 +105,15 @@ newct_restore() {
 }
 
 stop_oldct() {
-	if ! "$CMD" stop "$oldct"; then
-		echo "The old CT is not stopped."
-		exit 1
+	if ! "$CMD" shutdown "$oldct"; then
+		echo "The old ct is not shutdown. Try force stop."
+		if ! "$CMD" stop "$oldct"; then
+			echo "The old CT is not stopped."
+			exit 1
+		fi
+	else
+		echo "The old CT is shutdown."
 	fi
-	echo "The old CT stopped."
 }
 
 copyconf_old2new() {
