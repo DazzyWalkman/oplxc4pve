@@ -110,6 +110,8 @@ stop_oldct() {
 		if ! "$CMD" stop "$oldct"; then
 			echo "The old CT is not stopped."
 			exit 1
+		else
+			echo "The old CT is stopped."
 		fi
 	else
 		echo "The old CT is shutdown."
