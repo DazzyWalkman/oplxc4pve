@@ -10,12 +10,6 @@ ctStrg="local-lvm"
 ct_conf_path="/etc/pve/lxc"
 #OpenWRT config backup filename
 backup_filename="sysupgrade.tgz"
-#bind mount MP in the CT instance
-guest_mp_path="/shared"
-#bind mount dirname on host
-host_share_dirname="ctshare"
-#bind mount full path on host
-host_mp_path="/run/$host_share_dirname"
 #rootfs size for the new CT instance in GB
 rf_size="0.2"
 #memory size for the new CT instance in MB
@@ -49,9 +43,6 @@ create_newct() {
 		echo "The tarball is larger than the previously defined rootfs size. Increase the rootfs size to $tar_size GB."
 		rf_size="$tar_size"
 	fi
-	#The CTs use a bind mount of host_mp_path on host to share files among them.
-	mkdir -p "$host_mp_path"
-	chown 100000:100000 "$host_mp_path"
 	ctname=$(tar xfO "$ct_template" ./etc/openwrt_release 2>/dev/nul | grep DISTRIB_DESCRIPTION | sed -e "s/.*='\(.*\)'/\1/")
 	if [ ! "$ctname" ]; then
 		echo "Failed to extract ct name from the openwrt_release file. Fallback to extracting from the template filename."
@@ -61,7 +52,7 @@ create_newct() {
 	if [ ! "$ctname" ]; then
 		ctname="Unknown"
 	fi
-	if ! "$CMD" create "$newct" "$ct_template" --rootfs "$ctStrg":"$rf_size" --ostype unmanaged --hostname "$ctname" --arch "$arch" --cores "$cores" --memory "$memory" --mp0 "$host_mp_path/,mp=$guest_mp_path" --swap "$swap" --unprivileged "$unprivileged"; then
+	if ! "$CMD" create "$newct" "$ct_template" --rootfs "$ctStrg":"$rf_size" --ostype unmanaged --hostname "$ctname" --arch "$arch" --cores "$cores" --memory "$memory" --swap "$swap" --unprivileged "$unprivileged"; then
 		echo "Failed to Create CT"
 		exit 1
 	fi
@@ -69,11 +60,16 @@ create_newct() {
 }
 
 oldct_backup() {
-	if [ -f "$host_mp_path"/"$backup_filename" ]; then
-		rm "$host_mp_path"/"$backup_filename"
+	confbakdir=$(mktemp -d -p /run)
+	if [ ! -d "$confbakdir" ]; then
+		echo "Failed to make tempdir. Abort."
+		exit 1
 	fi
-	if "$CMD" exec "$oldct" -- ash -c "sysupgrade -b $guest_mp_path/$backup_filename"; then
-		echo "Old CT conf backup completed."
+	if "$CMD" exec "$oldct" -- ash -c "sysupgrade -b /tmp/$backup_filename"; then
+		pct pull "$oldct" /tmp/"$backup_filename" "$confbakdir"/"$backup_filename"
+		if [ -f "$confbakdir"/"$backup_filename" ]; then
+			echo "Old CT conf backup completed."
+		fi
 	else
 		echo "Old CT conf backup failed."
 		exit 1
@@ -82,12 +78,16 @@ oldct_backup() {
 
 newct_restore() {
 	#Validate the config backup file
-	if gunzip -c "$host_mp_path"/"$backup_filename" | tar -t >/dev/null; then
+	if gunzip -c "$confbakdir"/"$backup_filename" | tar -t >/dev/null; then
 		local newct_rootfs=""
 		newct_rootfs=$("$CMD" mount "$newct" | cut -d \' -f2)
 		if [ -d "$newct_rootfs" ]; then
 			#Copy the config backup file to the newct root. It will get restored during the first boot of the new ct.
-			cp "$host_mp_path"/"$backup_filename" "$newct_rootfs"
+			cp "$confbakdir"/"$backup_filename" "$newct_rootfs"
+			#Clean up
+			if [ -f "$newct_rootfs"/"$backup_filename" ]; then
+				rm -rf "$confbakdir"
+			fi
 			#Make sure the backup file is owned by ct root, thus can be deleted after restoration.
 			chown 100000:100000 "$newct_rootfs"/"$backup_filename"
 			if ! pct unmount "$newct"; then
@@ -113,8 +113,8 @@ stop_oldct() {
 }
 
 copyconf_old2new() {
-	#Copy remaining bind mounts to the new ct. a maximum number of 256 mps is allowed.
-	grep -E "^mp([1-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])" "$octfn" >>"$nctfn"
+	#Copy bind mounts to the new ct. a maximum number of 256 mps is allowed.
+	grep -E "^mp([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])" "$octfn" >>"$nctfn"
 	#Copy nics to the new ct. As of pve-container 3.1-13, a maximum number of 32 nics is allowed.
 	grep -E "^net([0-9]|[12][0-9]|3[01])" "$octfn" >>"$nctfn"
 	#For the lxc settings.
