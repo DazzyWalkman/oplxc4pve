@@ -4,6 +4,10 @@ if [ ! -x "$CMD" ]; then
 	echo "Pct utility not found. Abort."
 	exit 1
 fi
+#Option for automatic ct hostname generation
+declare -i autoname="1"
+#Preset hostname for the ct
+ctname=""
 #Storage name in Proxmox for CT instance rootfs disk
 ctStrg="local-lvm"
 #Path of Proxmox CT conf
@@ -43,10 +47,14 @@ create_newct() {
 		echo "The tarball is larger than the previously defined rootfs size. Increase the rootfs size to $tar_size GB."
 		rf_size="$tar_size"
 	fi
-	ctname=$(tar xfO "$ct_template" ./etc/openwrt_release 2>/dev/nul | grep DISTRIB_DESCRIPTION | sed -e "s/.*='\(.*\)'/\1/")
-	if [ ! "$ctname" ]; then
-		echo "Failed to extract ct name from the openwrt_release file. Fallback to extracting from the template filename."
-		ctname=$(basename "$ct_template" | cut -d'-' -f1)-$(basename "$ct_template" | cut -d'-' -f2)-$(basename "$ct_template" | cut -d'-' -f3)-$(basename "$ct_template" | cut -d'-' -f4)
+	if [ "$autoname" -ne 0 ]; then
+		ctname=$(tar xfO "$ct_template" ./etc/openwrt_release 2>/dev/nul | grep DISTRIB_DESCRIPTION | sed -e "s/.*='\(.*\)'/\1/")
+		if [ ! "$ctname" ]; then
+			echo "Failed to extract ct name from the openwrt_release file. Fallback to extracting from the template filename."
+			ctname=$(basename "$ct_template" | cut -d'-' -f1)-$(basename "$ct_template" | cut -d'-' -f2)-$(basename "$ct_template" | cut -d'-' -f3)-$(basename "$ct_template" | cut -d'-' -f4)
+		fi
+	else
+		echo "Autoname is off. "
 	fi
 	ctname=$(echo "$ctname" | sed -e 's/[^a-zA-Z0-9-]/-/g' | sed -e 's/^--*//' | sed -e 's/--*$//')
 	if [ ! "$ctname" ]; then
@@ -151,6 +159,10 @@ usage() {
 }
 
 getoctpara() {
+	if [ "$autoname" -eq 0 ]; then
+		echo "Autoname is off. Take ctname from the old ctname."
+		ctname=$(grep "^hostname" "$octfn" | cut -d" " -f2)
+	fi
 	arch=$(grep "^arch" "$octfn" | cut -d" " -f2)
 	cores=$(grep "^cores" "$octfn" | cut -d" " -f2)
 	memory=$(grep "^memory" "$octfn" | cut -d" " -f2)
