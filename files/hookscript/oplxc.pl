@@ -20,6 +20,7 @@ system("modprobe cls_flow");
 system("modprobe cls_tcindex");
 system("modprobe cls_u32");
 system("modprobe em_u32");
+system("modprobe act_gact");
 system("modprobe act_mirred");
 system("modprobe act_skbedit");
 system("modprobe cls_matchall");
