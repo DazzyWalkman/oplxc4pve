@@ -74,7 +74,7 @@ oldct_backup() {
 		exit 1
 	fi
 	if "$CMD" exec "$oldct" -- ash -c "sysupgrade -b /tmp/$backup_filename"; then
-		pct pull "$oldct" /tmp/"$backup_filename" "$confbakdir"/"$backup_filename"
+		"$CMD" pull "$oldct" /tmp/"$backup_filename" "$confbakdir"/"$backup_filename"
 		if [ -f "$confbakdir"/"$backup_filename" ]; then
 			echo "Old CT conf backup completed."
 		fi
@@ -98,7 +98,7 @@ newct_restore() {
 			fi
 			#Make sure the backup file is owned by ct root, thus can be deleted after restoration.
 			chown 100000:100000 "$newct_rootfs"/"$backup_filename"
-			if ! pct unmount "$newct"; then
+			if ! "$CMD" unmount "$newct"; then
 				exit 1
 			fi
 			echo "New CT conf copied."
