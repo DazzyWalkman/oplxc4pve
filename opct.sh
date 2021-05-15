@@ -4,6 +4,10 @@ if [ ! -x "$CMD" ]; then
 	echo "Pct utility not found. Abort."
 	exit 1
 fi
+if [ "$(id -u)" != 0 ]; then
+	echo "You have to get root privileges to run this script. Abort."
+	exit 1
+fi
 #Option for automatic ct hostname generation
 declare -i autoname="1"
 #Preset hostname for the ct
