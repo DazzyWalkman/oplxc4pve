@@ -48,6 +48,8 @@ Swap a running old instance (vmid 101), with new one (vmid 102)
 
 ./opct.sh swap 101 102
 
+Please note:  It's advisable to run ./opct.sh swap inside screen or tmux, to avoid unexpected termination of this script, for the ssh session to the pve host may end when the old OpenWRT instance which handles WAN/LAN connection is shutdown. 
+
 SEE ALSO:
 
 Manpage for Proxmox VE pct utility: https://pve.proxmox.com/pve-docs/pct.1.html
