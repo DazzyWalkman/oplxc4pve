@@ -26,6 +26,7 @@ system("modprobe act_skbedit");
 system("modprobe cls_matchall");
 system("modprobe act_connmark");
 system("modprobe act_ctinfo");
+system("modprobe act_ipt");
 system("modprobe sch_cake");
 system("modprobe sch_netem");
 system("modprobe sch_mqprio");
