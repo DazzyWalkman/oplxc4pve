@@ -1,13 +1,4 @@
 #!/bin/bash
-CMD=$(command -v pct)
-if [ ! -x "$CMD" ]; then
-	echo "Pct utility not found. Abort."
-	exit 1
-fi
-if [ "$(id -u)" != 0 ]; then
-	echo "You have to get root privileges to run this script. Abort."
-	exit 1
-fi
 #Option for automatic ct hostname generation
 declare -i autoname="1"
 #Preset hostname for the ct
@@ -269,7 +260,19 @@ doupgrade() {
 	echo "The new instance is independent of the old one. Users may delete the old instances via pct destroy when they see fit."
 	exit 0
 }
+preq_chk() {
+	CMD=$(command -v pct)
+	if [ ! -x "$CMD" ]; then
+		echo "Pct utility not found. Abort."
+		exit 1
+	fi
+	if [ "$(id -u)" != 0 ]; then
+		echo "You have to get root privileges to run this script. Abort."
+		exit 1
+	fi
+}
 
+preq_chk
 subcmd="$1"
 case $subcmd in
 	"new" | "ne") donew "$@" ;;
