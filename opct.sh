@@ -19,7 +19,7 @@ declare -i cores="1"
 declare -i swap="0"
 #unprivileged or not
 declare -i unprivileged="1"
-#OpenWRT config backup filename. DO NOT EDIT. Using non-default value will BREAK OpenWRT built-in config restoration after upgrade.
+#OpenWrt config backup filename. DO NOT EDIT. Using non-default value will BREAK OpenWrt built-in config restoration after upgrade.
 declare -r backup_filename="sysupgrade.tgz"
 
 check_ct() {
@@ -173,12 +173,12 @@ getoctpara() {
 }
 
 donew() {
-	#The vmid of the new OpenWRT lxc instance to be created
+	#The vmid of the new OpenWrt lxc instance to be created
 	declare -i newct=$2
-	#The path and filename of the OpenWRT plain template
+	#The path and filename of the OpenWrt plain template
 	ct_template=$3
 	if [ -z "$ct_template" ] || [ "$newct" -le "0" ]; then
-		echo "This command creates a new OpenWRT lxc instance based on a user-specified CT template."
+		echo "This command creates a new OpenWrt lxc instance based on a user-specified CT template."
 		echo "Usage: $0 <new|ne> <New_vmid> <CT_template>"
 		exit 1
 	fi
@@ -198,12 +198,12 @@ donew() {
 }
 
 doswap() {
-	#The old and running OpenWRT lxc instance vmid
+	#The old and running OpenWrt lxc instance vmid
 	declare -i oldct=$2
-	#The vmid of the new OpenWRT lxc instance to be created
+	#The vmid of the new OpenWrt lxc instance to be created
 	declare -i newct=$3
 	if [ -z "$newct" ] || [ "$oldct" -le "0" ] || [ "$newct" -le "0" ] || [ "$oldct" == "$newct" ]; then
-		echo "This command stops the old OpenWRT lxc instance, then starts the new one, effectively does the swapping."
+		echo "This command stops the old OpenWrt lxc instance, then starts the new one, effectively does the swapping."
 		echo "Usage: $0 <swap|sw> <Old_vmid> <New_vmid>"
 		exit 1
 	fi
@@ -218,23 +218,23 @@ doswap() {
 	fi
 	stop_oldct
 	start_newct
-	echo "OpenWRT CT instances swapping completed."
+	echo "OpenWrt CT instances swapping completed."
 	exit 0
 }
 
 doupgrade() {
-	#The old and running OpenWRT lxc instance vmid
+	#The old and running OpenWrt lxc instance vmid
 	declare -i oldct=$2
-	#The vmid of the new OpenWRT lxc instance to be created
+	#The vmid of the new OpenWrt lxc instance to be created
 	declare -i newct=$3
 	#The old ct conf file full path name
 	octfn="$ct_conf_path"/"$oldct".conf
 	#The new ct conf file full path name
 	nctfn="$ct_conf_path"/"$newct".conf
-	#The path and filename of the OpenWRT plain template
+	#The path and filename of the OpenWrt plain template
 	ct_template=$4
 	if [ -z "$ct_template" ] || [ "$oldct" -le "0" ] || [ "$newct" -le "0" ] || [ "$oldct" == "$newct" ]; then
-		echo "This command creates an upgrade of the running OpenWRT lxc instance based on a user-specified CT template."
+		echo "This command creates an upgrade of the running OpenWrt lxc instance based on a user-specified CT template."
 		echo "Usage: $0 <upgrade|up> <Old_vmid> <New_vmid> <CT_template>"
 		exit 1
 	fi
@@ -255,7 +255,7 @@ doupgrade() {
 	create_newct
 	newct_restore
 	copyconf_old2new
-	echo "An upgraded instance of OpenWRT CT has been created successfully. "
+	echo "An upgraded instance of OpenWrt CT has been created successfully. "
 	echo "The old instance is left untouched except start_onboot disabled."
 	echo "The new instance is independent of the old one. Users may delete the old instances via pct destroy when they see fit."
 	exit 0
