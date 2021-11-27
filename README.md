@@ -5,7 +5,7 @@ Wrapper script for creating/upgrading unprivileged lxc instances from OpenWrt ro
 
 Requirements
 ------------
-The Proxmox VE 6.2. 
+The Proxmox VE 6.2 or later. 
 This script or the resulting OpenWRT instances may work on older pve versions, however it's untested.
  
 Configuration
