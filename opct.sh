@@ -177,7 +177,7 @@ donew() {
 	declare -i newct=$2
 	#The path and filename of the OpenWrt plain template
 	ct_template=$3
-	if [ -z "$ct_template" ] || [ "$newct" -le "0" ]; then
+	if [ -z "$ct_template" ] || [ "$newct" -le "0" ] || [ -n "$4" ]; then
 		echo "This command creates a new OpenWrt lxc instance based on a user-specified CT template."
 		echo "Usage: $0 <new|ne> <New_vmid> <CT_template>"
 		exit 1
@@ -202,7 +202,7 @@ doswap() {
 	declare -i oldct=$2
 	#The vmid of the new OpenWrt lxc instance to be created
 	declare -i newct=$3
-	if [ -z "$newct" ] || [ "$oldct" -le "0" ] || [ "$newct" -le "0" ] || [ "$oldct" == "$newct" ]; then
+	if [ -z "$newct" ] || [ "$oldct" -le "0" ] || [ "$newct" -le "0" ] || [ "$oldct" == "$newct" ] || [ -n "$4" ]; then
 		echo "This command stops the old OpenWrt lxc instance, then starts the new one, effectively does the swapping."
 		echo "Usage: $0 <swap|sw> <Old_vmid> <New_vmid>"
 		exit 1
@@ -233,7 +233,7 @@ doupgrade() {
 	nctfn="$ct_conf_path"/"$newct".conf
 	#The path and filename of the OpenWrt plain template
 	ct_template=$4
-	if [ -z "$ct_template" ] || [ "$oldct" -le "0" ] || [ "$newct" -le "0" ] || [ "$oldct" == "$newct" ]; then
+	if [ -z "$ct_template" ] || [ "$oldct" -le "0" ] || [ "$newct" -le "0" ] || [ "$oldct" == "$newct" ] || [ -n "$5" ]; then
 		echo "This command creates an upgrade of the running OpenWrt lxc instance based on a user-specified CT template."
 		echo "Usage: $0 <upgrade|up> <Old_vmid> <New_vmid> <CT_template>"
 		exit 1
