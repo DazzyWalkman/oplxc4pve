@@ -212,8 +212,8 @@ doswap() {
 		exit 1
 	fi
 
-	if check_ct "$newct" status; then
-		echo "The new CT does not exist."
+	if check_ct "$newct" stopped; then
+		echo "The new CT does not exist or is not stopped."
 		exit 1
 	fi
 	stop_oldct
