@@ -91,8 +91,6 @@ newct_restore() {
 			if [ -f "$newct_rootfs"/"$backup_filename" ]; then
 				rm -rf "$confbakdir"
 			fi
-			#Make sure the backup file is owned by ct root, thus can be deleted after restoration.
-			chown 100000:100000 "$newct_rootfs"/"$backup_filename"
 			if ! "$CMD" unmount "$newct"; then
 				exit 1
 			fi
