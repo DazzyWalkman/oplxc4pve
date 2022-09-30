@@ -49,10 +49,14 @@ system("modprobe gre");
 system("modprobe pptp");
 #Needed by nft_chain_nat
 system("modprobe nft_chain_nat");
+#needed by wireguard
+system("modprobe wireguard");
 #Use dedicated device file for the lxc instance.
-system("mkdir -p /dev_lxc/");
+system("mkdir -p /dev_lxc/net/");
 system("mknod -m 600 /dev_lxc/ppp c 108 0");
 system("chown 100000:100000 /dev_lxc/ppp");
+system("mknod -m 600 /dev_lxc/net/tun c 10 200");
+system("chown 100000:100000 /dev_lxc/net/tun");
 #Make dir for shared bind mount among CTs 
 system("mkdir -p /run/ctshare");
 #Make ctshare owned by container root, thus rw by CT is possible.
@@ -64,6 +68,7 @@ system("chown 100000:100000 /run/ctshare");
 } elsif ($phase eq 'post-stop') {
 #Cleanup
 system("rm /dev_lxc/ppp");
+system("rm /dev_lxc/net/tun");
 } else {
     die "got unknown phase '$phase'\n";
 }
