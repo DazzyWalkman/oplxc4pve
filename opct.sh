@@ -152,11 +152,11 @@ usage() {
 getoctpara() {
 	if [ "$autoname" -eq 0 ]; then
 		echo "Autoname is off. Take ctname from the old ctname."
-		ctname=$(grep "^hostname" "$octfn" | cut -d" " -f2)
+		ctname=$(grep "^hostname" "$octfn" | cut -d":" -f2 | xargs)
 	fi
-	arch=$(grep "^arch" "$octfn" | cut -d" " -f2)
-	cores=$(grep "^cores" "$octfn" | cut -d" " -f2)
-	memory=$(grep "^memory" "$octfn" | cut -d" " -f2)
+	arch=$(grep "^arch" "$octfn" | cut -d":" -f2 | xargs)
+	cores=$(grep "^cores" "$octfn" | cut -d":" -f2 | xargs)
+	memory=$(grep "^memory" "$octfn" | cut -d":" -f2 | xargs)
 	ctStrg=$(grep "^rootfs" "$octfn" | cut -d":" -f2 | xargs)
 	local tmp_size=""
 	tmp_size=$(grep "^rootfs" "$octfn" | cut -d"=" -f2)
@@ -166,8 +166,8 @@ getoctpara() {
 		"M") rf_size=$(echo "$(echo "$tmp_size" | cut -d"M" -f1) 1024" | awk '{printf "%.10f",$1 / $2}') ;;
 		*) echo "The disk size of the old ct is unknown. Default Value will be used." ;;
 	esac
-	swap=$(grep "^swap" "$octfn" | cut -d" " -f2)
-	unprivileged=$(grep "^unprivileged" "$octfn" | cut -d" " -f2)
+	swap=$(grep "^swap" "$octfn" | cut -d":" -f2 | xargs)
+	unprivileged=$(grep "^unprivileged" "$octfn" | cut -d":" -f2 | xargs)
 }
 
 donew() {
