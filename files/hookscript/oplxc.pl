@@ -17,7 +17,6 @@ system("modprobe cls_basic");
 system("modprobe cls_fw");
 system("modprobe cls_route");
 system("modprobe cls_flow");
-system("modprobe cls_tcindex");
 system("modprobe cls_u32");
 system("modprobe em_u32");
 system("modprobe act_gact");
