@@ -128,6 +128,8 @@ copyconf_old2new() {
 	grep "^lxc" "$octfn" >>"$nctfn"
 	#Hookscript
 	grep "^hookscript" "$octfn" >>"$nctfn"
+	#Features
+	grep "^features" "$octfn" >>"$nctfn"
 	#Set the new ct start onboot setting following the old ct.
 	grep "^onboot" "$octfn" >>"$nctfn"
 	grep order "$octfn" >>"$nctfn"
